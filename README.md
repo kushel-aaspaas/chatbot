@@ -6,6 +6,7 @@ git clone [https://github.com/your-username/chatbot.git](https://github.com/kush
 
 Navigate to the project directory:
 cd chatbot
+add your openai-api-token to the app.py file
 python app.py
 
 Dependencies
