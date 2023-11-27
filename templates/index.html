@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT UI</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        #chat-container {
+            flex: 1;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body class="font-sans bg-gray-100">
+    <div class="container mx-auto bg-red ">
+        <div class="container mx-auto my-8 p-8 bg-white rounded shadow">
+            <div id="chat-container" class="mb-4">
+                <div id="chat" class="border p-4 rounded bg-gray-200"></div>
+            </div>
+
+            <div class="flex items-center">
+                <input id="input-message" type="text" class="flex-1 border p-2 rounded"
+                    placeholder="Type your message...">
+                <button id="send-button" class="ml-2 bg-blue-500 text-white p-2 rounded">Send</button>
+                <div id="loading-indicator" class="ml-2 hidden">
+                    <div class="animate-spin rounded-full border-t-4 border-b-4 border-blue-500 h-6 w-6"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.1.3/socket.io.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('message', function (data) {
+                
+                var userMessage = data.user;
+                var assistantResponse = data.assistant;
+
+                var chatContainer = document.getElementById('chat');
+                var loadingIndicator = document.getElementById('loading-indicator');
+
+                var sendButton = document.getElementById('send-button');
+                loadingIndicator.classList.add('hidden');
+                sendButton.classList.remove('hidden');
+
+                var userMessageElement = document.createElement('p');
+                userMessageElement.className = 'mb-2';
+                chatContainer.appendChild(userMessageElement);
+
+                document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+
+                if (assistantResponse) {
+                    displayAssistantResponse(assistantResponse);
+                }
+            });
+
+            function displayAssistantResponse(assistantResponse) {
+                var chatContainer = document.getElementById('chat');
+                var assistantMessage = document.createElement('p');
+                assistantMessage.className = 'mb-2';
+                assistantMessage.innerHTML = '<strong>Assistant:</strong> ' + assistantResponse;
+                chatContainer.appendChild(assistantMessage);
+                document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+            }
+
+            document.getElementById('send-button').onclick = function () {
+                var message = document.getElementById('input-message').value;
+                if (message.trim() !== '') {
+                    var loadingIndicator = document.getElementById('loading-indicator');
+                    var sendButton = document.getElementById('send-button');
+
+                    loadingIndicator.classList.remove('hidden');
+                    sendButton.classList.add('hidden');
+
+                    socket.emit('message', { user: message, assistant: null });
+                    var userMessageElement = document.createElement('p');
+                    userMessageElement.className = 'mb-2';
+                    userMessageElement.innerHTML = '<strong>You:</strong> ' + message;
+                    document.getElementById('chat').appendChild(userMessageElement);
+                    document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+                    document.getElementById('input-message').value = '';
+                }
+            };
+        });
+    </script>
+
+</body>
+
+</html>
