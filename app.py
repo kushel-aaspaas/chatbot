@@ -9,9 +9,6 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 
 conversation_history = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello, what's the weather like today?"},
-        {"role": "assistant", "content": "I'm sorry, I don't have real-time weather information."},
     ]
 
 @app.route('/')
